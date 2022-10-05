@@ -1,0 +1,198 @@
+﻿@model INFHW_05.ViewModels.ViewBooksModel
+@{
+    ViewBag.Title = "Index";
+
+    var booksAvailable = Model.booksAvailableBorroweds.Count();
+
+    var message = ViewBag.Message;
+    var success = ViewBag.Success;
+
+    
+}
+
+<style type="text/css">
+    #hideMe {
+    -moz-animation: cssAnimation 0s ease-in 5s forwards;
+    /* Firefox */
+    -webkit-animation: cssAnimation 0s ease-in 5s forwards;
+    /* Safari and Chrome */
+    -o-animation: cssAnimation 0s ease-in 5s forwards;
+    /* Opera */
+    animation: cssAnimation 0s ease-in 5s forwards;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+@@keyframes cssAnimation {
+    to {
+        width:0;
+        height:0;
+        overflow:hidden;
+    }
+}
+@@-webkit-keyframes cssAnimation {
+    to {
+        width:0;
+        height:0;
+        visibility:hidden;
+    }
+</style>
+
+@if (Model.bookViewModels.Count > 0)
+{
+    <h2>Books</h2>
+
+
+    if (!string.IsNullOrEmpty(message) && success != false)
+    {
+        <p style="color:green" id="hideMe">@message</p>
+    }
+
+
+    using (Html.BeginForm("Index", "Home", FormMethod.Post))
+    {
+
+
+        <div class="row">
+            <div class="col-md-4">
+                @Html.TextBox("book", "", new { @class = "form-control", @placeholder = "Search Book Name" })
+            </div>
+
+            <div class="col-md-3">
+
+                @Html.DropDownList("type", INFHW_05.Services.TypeService.GetTypes(), new { @class = "form-control" })
+
+            </div>
+
+            <div class="col-md-3">
+
+                @Html.DropDownList("author", INFHW_05.Services.AuthorService.GetAuthors(), new { @class = "form-control" })
+
+            </div>
+
+            <div class="col-md-1">
+                <input type="submit" class="btn btn-success mr-2" style="width:80px !important" value="Search" id="filter">
+            </div>
+
+            <div class="col-md-1">
+                <a class="btn btn-danger" style="width:80px !important" id="clearFilter">Clear</a>
+            </div>
+
+        </div>
+
+    }
+
+    <br />
+    <br />
+
+
+    <table class="table table-striped" id="example">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Author</th>
+                <th>Type</th>
+                <th>Page Count</th>
+                <th>Points</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.bookViewModels)
+            {
+                <tr>
+                    <td>@item.bookId</td>
+                    <td>@item.name</td>
+                    <td>@item.author</td>
+                    <td>@item.type</td>
+                    <td>@item.pagecount</td>
+                    <td>@item.point</td>
+                    <td>@item.status</td>
+                    <td>
+                        <a style="width:130px !important" href="/Home/Index?book=&type=0&author=0&bookId=@item.bookId" class="btn btn-primary">View</a>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('#clearFilter').on("click", function () {
+                $('#book').val("");
+                $('#type').prop('selectedIndex', 0);
+                $('#author').prop('selectedIndex', 0);
+                $('#filter').click();
+            });
+
+        });
+    </script>
+}
+else if (Model.booksAvailableBorroweds.Count > 0)
+{
+    string isbookAvailable = "false";
+    <div class="row">
+        <div class="col-md-12">
+            <h2>@Model.BookName</h2> -
+
+            @if (Model.IsBookAvailable)
+            {
+
+                isbookAvailable = "true";
+
+                <p style="color:green">Book Available</p>
+
+            }
+            else
+            {
+                <p style="color:red">Book Out</p>
+            }
+
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3># Borrows - @booksAvailable </h3>
+
+        </div>
+        <div class="col-md-6" style="text-align:right">
+            <a style="width:130px !important" href="/Students/Index?studentName=&className=&bookId=@Model.BookId&isBookAvailable=@isbookAvailable" class="btn btn-primary">View Students</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped" id="example">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Taken Date</th>
+                        <th>Brought Date</th>
+                        <th>Borrowed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.booksAvailableBorroweds.OrderByDescending(x => x.BorrowId))
+                    {
+                        <tr>
+                            <td>@item.BorrowId</td>
+                            <td>@item.TakenDate</td>
+                            <td>@item.BroughtDate</td>
+                            <td>@item.StudentName @item.StudentSurname</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+}

@@ -1,0 +1,102 @@
+﻿@model List<INFHW_05.ViewModels.StudentViewModel>
+@{
+    ViewBag.Title = "Index";
+    var bookId = ViewBag.BookId;
+    var isBookAvailable = ViewBag.isBookAvailable;
+
+}
+
+<h2>Students</h2>
+
+@using (Html.BeginForm("Index", "Students", FormMethod.Post))
+{
+    @Html.HiddenFor(x => bookId)
+    @Html.HiddenFor(x => isBookAvailable)
+
+    <div class="row">
+        <div class="col-md-4">
+            @Html.TextBox("studentName", "", new { @class = "form-control", @placeholder = "Search Student Name" })
+        </div>
+
+        <div class="col-md-4">
+
+            @Html.DropDownList("className", INFHW_05.Services.StudentService.GetClasses(), new { @class = "form-control" })
+
+        </div>
+
+
+        <div class="col-md-2">
+            <input type="submit" class="btn btn-success mr-2" style="width:80px !important" value="Search" id="filter">
+        </div>
+
+        <div class="col-md-2">
+            <a class="btn btn-danger" style="width:80px !important" id="clearFilter">Clear</a>
+        </div>
+
+    </div>
+
+}
+
+<br />
+<br />
+
+
+<table class="table table-striped" id="example">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Class</th>
+            <th>Points</th>
+            @if (Model.Any(x => x.IsReturnBook))
+            {
+                <th>Return Books</th>
+            }
+            else
+            {
+                <th>Borrow Books</th>
+            }
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderByDescending(x => x.studentId))
+        {
+            <tr>
+                <td>@item.studentId</td>
+                <td>@item.name</td>
+                <td>@item.surname</td>
+                <td>@item._class</td>
+                <td>@item.point</td>
+                <td>
+                    @if (item.IsReturnBook)
+                    {
+                        <a style="width:130px !important" href="/Students/ReturnBook?borrowId=@item.borrowId" class="btn btn-primary">Return Book</a>
+                    }
+
+                    @if (Model.All(x => x.IsReturnBook == false))
+                    {
+                        <a style="width:130px !important" href="/Students/BorrowBook?bookId=@item.bookId&studentId=@item.studentId" class="btn btn-primary">Borrow Book</a>
+                    }
+
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#clearFilter').on("click", function () {
+            $('#studentName').val("");
+            $('#className').prop('selectedIndex', 0);
+            $('#filter').click();
+        });
+
+    });
+</script>
+
